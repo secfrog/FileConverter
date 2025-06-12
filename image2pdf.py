@@ -275,6 +275,9 @@ if len(List_of_logs) > 0:
 if __name__ == '__main__':
     root = CTk()
     root.geometry("700x700")
+    root.title("png2pdf")
+    root.iconbitmap(bitmap="frog.ico")
+    
     app = MainFrame(root)
 
     root.mainloop()
