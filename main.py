@@ -4,6 +4,8 @@ from customtkinter import(
     CTk,
     CTkFrame,
     CTkButton,
+    set_appearance_mode,
+    set_default_color_theme,
 )
 
 from image2pdf import MainFrame
@@ -140,8 +142,13 @@ class ADD_TAB(CTkButton):
 
 
 if __name__ == '__main__':
+    set_appearance_mode("dark")
+    set_default_color_theme("dark-blue")
+
     root = CTk()
     root.geometry("700x700")
+    root.title("File Converter")
+    root.iconbitmap(bitmap="frog.ico")
 
     app = App(root)
     root.mainloop()

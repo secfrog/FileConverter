@@ -25,11 +25,7 @@ class MainFrame(CTkFrame):
             fg_color="#333333",
             corner_radius=0,
         )
-        if __name__ != '__main__': # The user may left the program running (converting images to pdf) and use another tab, if he does then this if clause should prevent overlaying his new mainframe associated to the tab he is using
-            if len(self.master.last_active_tab)>0:
-                if self.master.tabs_dict[self.master.last_active_tab[-1]] == self:
-                    self.pack(fill="both", expand=True)
-        else:
+        if __name__ == '__main__':
             self.pack(fill="both", expand=True)
 
         self.selected_images = None
@@ -209,8 +205,10 @@ class MainFrame(CTkFrame):
             new_mainframe = MainFrame(self.master)
             for tab in self.master.tabs_dict:
                 if self.master.tabs_dict[tab] == self:
-                    pass
                     self.master.tabs_dict[tab] = new_mainframe
+            if len(self.master.last_active_tab) > 0:
+                if self.master.tabs_dict[self.master.last_active_tab[-1]] == new_mainframe:
+                    new_mainframe.pack(fill="both", expand=True)
         else:
             new_mainframe = MainFrame(self.master)
     
