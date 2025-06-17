@@ -4,11 +4,51 @@ from customtkinter import(
     CTk,
     CTkFrame,
     CTkButton,
+    CTkImage,
     set_appearance_mode,
     set_default_color_theme,
 )
+from PIL import Image
 
-from image2pdf import MainFrame
+from image2pdf import Image2PDF
+from pdf2image import PDF2Image
+
+
+
+class DefaultMainFrame(CTkFrame):
+    def __init__(self, master):
+        super().__init__(
+            master,
+            fg_color="#333333",
+            corner_radius=0,
+        )
+        self.pack(fill="both", expand=True)
+
+        self.mainframes = [PDF2Image, Image2PDF]
+        self.image1 = CTkImage(light_image=Image.open("assets/Image2PDF.png"), size=(170, 170))
+        self.image2 = CTkImage(light_image=Image.open("assets/PDF2Image.png"), size=(170, 170))
+        
+
+        self.mainframes = [
+            {
+                Image2PDF:self.image1,
+                PDF2Image:self.image2,
+            }
+        ]
+        for row, mainframes in enumerate(self.mainframes):
+            for column, mainframe in enumerate(mainframes):
+                self.create_mainframe_button(mainframe=mainframe, image=mainframes[mainframe], column=column, row=row)
+
+    def create_mainframe_button(self, mainframe, image, column, row):
+        mainframe_button = CTkButton(
+            master=self,
+            text=mainframe.__name__.replace("2", " to "),
+            image=image,
+            compound="top",
+            command=lambda frame=mainframe: self.master.last_add_button.add(frame=frame)
+        )
+        mainframe_button.grid(row=row, column=column, padx=23,pady=20, sticky="nw")
+
 
 class App(CTkFrame):
     def __init__(self, master):
@@ -21,12 +61,12 @@ class App(CTkFrame):
 
         self.tabsline = TABS_LINE(self)
 
-        self.tabnum = 1
+        self.tabcount = 1
         self.tabs_dict = dict()
         self.last_active_tab = []
         
         self.default_tab = TAB(self.tabsline)
-        self.default_main_frame = MainFrame(self)
+        self.default_main_frame = DefaultMainFrame(self)
         
         self.tabs_dict.update({self.default_tab:self.default_main_frame})
         self.last_active_tab.append(self.default_tab)
@@ -35,7 +75,7 @@ class App(CTkFrame):
 
         self.close_default_tab = CLOSE_TAB(self.default_tab)
         self.default_add_tab = ADD_TAB(self.tabsline)
-
+        self.last_add_button = self.default_add_tab
         
     
     
@@ -93,16 +133,16 @@ class CLOSE_TAB(CTkButton):
             hover_color="#3D3D3D",
             width=6,
             height=6,
-            corner_radius=50,
+            corner_radius=20,
             command=self.close,
         )
         self.pack(side="right", padx=10)
     
     def close(self):
-        if self.master.master.master.tabnum == 1:
+        if self.master.master.master.tabcount == 1:
             sys.exit()
         else:
-            self.master.master.master.tabnum -= 1
+            self.master.master.master.tabcount -= 1
             self.master.destroy()
             self.master.master.master.tabs_dict[self.master].destroy()
             del self.master.master.master.tabs_dict[self.master]
@@ -116,26 +156,27 @@ class ADD_TAB(CTkButton):
             text="+",
             font=("Times New Roman", 20),
             text_color="white",
-            fg_color="#3D3D3D",
+            fg_color="#181818",
             hover_color="grey",
             width=35,
             height=35,
-            corner_radius=0,
+            corner_radius=5,
             command=self.add,
         )
         self.configure(cursor="arrow")
-        self.pack(side="left", ipady=2,ipadx=3)
+        self.pack(side="left", ipady=2,ipadx=3, padx=2, pady=2)
         self.pack_propagate(False)
     
-    def add(self):
-        if self.master.master.tabnum < 4:
-            self.master.master.tabnum += 1
+    def add(self, frame=DefaultMainFrame):
+        if self.master.master.tabcount < 3:
+            self.master.master.tabcount += 1
             self.destroy()
             self.master.master.tabs_dict[self.master.master.last_active_tab[-1]].pack_forget()
             newtab = TAB(self.master)
-            newmainframe = MainFrame(self.master.master)
+            newmainframe = frame(self.master.master)
             newclosebutton = CLOSE_TAB(newtab)
             newaddbutton = ADD_TAB(self.master)
+            self.master.master.last_add_button = newaddbutton
             self.master.master.tabs_dict.update({newtab:newmainframe})
             self.master.set_active_tab(newtab)
 
@@ -148,7 +189,7 @@ if __name__ == '__main__':
     root = CTk()
     root.geometry("700x700")
     root.title("File Converter")
-    root.iconbitmap(bitmap="frog.ico")
+    root.iconbitmap(bitmap="assets/frog.ico")
 
     app = App(root)
     root.mainloop()
